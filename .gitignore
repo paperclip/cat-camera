@@ -1,0 +1,8 @@
+
+*.pyc
+bottleneck/
+camera/
+images/
+log/
+other_images/
+retrain_logs/
