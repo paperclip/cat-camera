@@ -6,3 +6,9 @@ images/
 log/
 other_images/
 retrain_logs/
+checkpoint
+cat_labels.txt
+cat_retrained.pb
+cat_water.data-00000-of-00001
+cat_water.index
+cat_water.meta
