@@ -57,11 +57,15 @@ remaining = len(new)
 
 for n in new:
     src = os.path.join("camera",n)
-    results = c.predict_image(src)
-    dest = os.path.join("new_cat","%d0"%(int(results[1][0]*10)))
-    print("%s\t%s\t%s\t%d"%(src,str(results),dest,remaining))
-    shutil.copy(src,dest)
-    remaining -= 1
+    try:
+        results = c.predict_image(src)
+        dest = os.path.join("new_cat","%d0"%(int(results[1][0]*10)))
+        print("%s\t%s\t%s\t%d"%(src,str(results),dest,remaining))
+        shutil.copy(src,dest)
+        remaining -= 1
+    except Exception as e:
+        print("Failed to process %s"%src)
+        print(e)
 
 
 

@@ -12,3 +12,5 @@ cat_retrained.pb
 cat_water.data-00000-of-00001
 cat_water.index
 cat_water.meta
+*.jpeg
+*.mp4
