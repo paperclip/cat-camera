@@ -3,6 +3,7 @@
 import os
 import shutil
 import subprocess
+import sys
 
 ## rsync -va douglas@pi:webdata/camera/ camera
 
@@ -16,7 +17,12 @@ catDir = os.path.join("images","cat")
 
 cats = set(os.listdir(catDir))
 notcats = set(os.listdir(os.path.join("images","not_cat")))
-camera = set(os.listdir("camera"))
+
+
+cameraDir = "camera"
+if len(sys.argv) > 1:
+    cameraDir = sys.argv[1]
+camera = set(os.listdir(cameraDir))
 
 assert len(cats) > 0
 assert len(notcats) > 0
@@ -56,7 +62,7 @@ c = classifier.ImageClassify()
 remaining = len(new)
 
 for n in new:
-    src = os.path.join("camera",n)
+    src = os.path.join(cameraDir,n)
     try:
         results = c.predict_image(src)
         dest = os.path.join("new_cat","%d0"%(int(results[1][0]*10)))
