@@ -41,15 +41,18 @@ os.chdir(r"C:\Users\windo\Documents\camera")
 
 def total():
     t = 0
-    for base in range(9,-1,-1):
-        directory = os.path.join("new_cat","%d0"%base)
-        pics = os.listdir(directory)
-        t += len(pics)
+    for base in range(100,-1,-1):
+        directory = os.path.join("new_cat","%02d"%base)
+        if os.path.isdir(directory):
+            pics = os.listdir(directory)
+            t += len(pics)
     return t
 
 def newCat(imageProcessor):
-    for base in range(9,-1,-1):
-        directory = os.path.join("new_cat","%d0"%base)
+    for base in range(100,-1,-1):
+        directory = os.path.join("new_cat","%02d"%base)
+        if not os.path.isdir(directory):
+            continue
         pics = os.listdir(directory)
         for p in pics:
             yield os.path.join(directory,p)

@@ -40,10 +40,12 @@ def safemkdir(d):
     except EnvironmentError:
         pass
 
-for i in range(10):
-    p = os.path.join("new_cat","%d0"%i)
-    safemkdir(p)
-    new -= set(os.listdir(p))
+for i in range(100):
+    p = os.path.join("new_cat","%02d"%i)
+    try:
+        new -= set(os.listdir(p))
+    except EnvironmentError:
+        pass
 
 marker = "timelapse-2018-08-12-13-15-24.jpeg"
 
@@ -64,8 +66,12 @@ remaining = len(new)
 for n in new:
     src = os.path.join(cameraDir,n)
     try:
+        stat = os.stat(src)
+        if stat.st_size < 100:
+            continue
         results = c.predict_image(src)
-        dest = os.path.join("new_cat","%d0"%(int(results[1][0]*10)))
+        dest = os.path.join("new_cat","%02d"%(int(results[1][0]*100)))
+        safemkdir(dest)
         print("%s\t%s\t%s\t%d"%(src,str(results),dest,remaining))
         shutil.copy(src,dest)
         remaining -= 1
