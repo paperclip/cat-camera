@@ -48,6 +48,16 @@ def total():
             t += len(pics)
     return t
 
+REMAINING = None
+
+def skipImage(basename):
+    if basename > "timelapse-2019-05-04-00" and basename < "timelapse-2019-05-09-00":
+        print("Skipping {}".format(basename))
+        global REMAINING
+        REMAINING -= 1
+        return True
+    return False
+
 def newCat(imageProcessor):
     for base in range(100,-1,-1):
         directory = os.path.join("new_cat","%02d"%base)
@@ -55,7 +65,8 @@ def newCat(imageProcessor):
             continue
         pics = os.listdir(directory)
         for p in pics:
-            yield os.path.join(directory,p)
+            if not skipImage(p):
+                yield os.path.join(directory,p)
 
     imageProcessor.close()
 
@@ -72,9 +83,10 @@ class ManualImageProcessor(object):
         self.m_nextImages = []
         self.m_moreImages = newCat(self)
         self.m_imageName = None
+        global REMAINING
+        REMAINING = total()
         self.nextImage()
         self.m_viewer.show()
-        self.m_remaining = total()
 
     def close(self):
         print("Killing")
@@ -113,12 +125,14 @@ class ManualImageProcessor(object):
             self.setImage(n)
 
     def cat(self):
-        print('Cat %d remaining '%self.m_remaining)
+        global REMAINING
+        print('Cat %d remaining '%REMAINING)
         self.moveImage("images","cat")
         return self.nextImage()
 
     def notcat(self):
-        print('Not Cat %d'%self.m_remaining)
+        global REMAINING
+        print('Not Cat %d'%REMAINING)
         self.moveImage("images","not_cat")
         return self.nextImage()
 
@@ -174,15 +188,16 @@ class ManualImageProcessor(object):
 
         ## Update counts
         self.updateCounts(dest)
+        global REMAINING
 
         if os.path.isfile(dest):
             print("%s already exists"%dest)
             os.unlink(src)
-            return
+            REMAINING -= 1
         else:
             print("Rename %s to %s"%(src,dest))
             os.rename(src,dest)
-            self.m_remaining -= 1
+            REMAINING -= 1
 
     def setImage(self, imageName):
         self.m_imageName = imageName
@@ -216,4 +231,3 @@ def main(argv):
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
-
