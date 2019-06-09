@@ -17,3 +17,4 @@ cat_water.meta
 redboot/
 redbootTemp/
 cat/
+*.h5
