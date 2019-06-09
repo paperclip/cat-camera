@@ -2,6 +2,7 @@
 ## from 2018-10-21 08:30:09
 import os
 import subprocess
+import sys
 
 def clearTemp(tempdir):
     try:
@@ -37,3 +38,35 @@ def createVideo(destFileName, tempdir, fps=20):
     subprocess.call(['ffmpeg','-r',str(fps),
         '-i',os.path.join(tempdir,"image%05d.jpeg"),
         destFileName])
+    return 0
+
+def main(argv):
+    if len(argv) > 1:
+        srcdir = argv[1]
+    else:
+        srcdir = "cat"
+
+    if len(argv) > 2:
+        dest = argv[2]
+    else:
+        dest = "cat_timelapse.mp4"
+
+    if len(argv) > 3:
+        minStem = argv[3]
+    else:
+        minStem = None
+
+    files = os.listdir(srcdir)
+
+    if minStem is not None:
+        files = [ f for f in files if f > minStem ]
+
+    files.sort()
+
+    tempdir = "timelapseTemp"
+
+    i = linkIntoTemp(files, srcdir, tempdir, 1000)
+    return createVideo(dest, tempdir, 10)
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
