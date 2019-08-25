@@ -51,10 +51,10 @@ def total():
 REMAINING = None
 
 def skipImage(basename):
-    if basename > "timelapse-2019-05-04-00" and basename < "timelapse-2019-05-09-00":
-        print("Skipping {}".format(basename))
+    if False and basename > "timelapse-2019-05-04-00" and basename < "timelapse-2019-05-09-00":
         global REMAINING
         REMAINING -= 1
+        print("Skipping {}: {}".format(basename, REMAINING))
         return True
     return False
 
