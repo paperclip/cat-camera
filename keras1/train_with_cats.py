@@ -82,10 +82,10 @@ history = model.fit_generator(image_data, epochs=EPOCHS,
                     steps_per_epoch=steps_per_epoch,
                     callbacks = [batch_stats])
 
-print(history)
-
 model.save("cat_model_{}.h5".format(model_name))
 
+print(history)
+#
 plt.figure()
 plt.ylabel("Loss")
 plt.xlabel("Training Steps")
