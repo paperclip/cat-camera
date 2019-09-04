@@ -18,3 +18,4 @@ redboot/
 redbootTemp/
 cat/
 *.h5
+sizes.csv
