@@ -182,6 +182,8 @@ class ManualImageProcessor(object):
         base = os.path.basename(self.m_imageName)
         src = self.src()
         dest = os.path.join(*dest, base)
+        statbuf = os.stat(src)
+        size = statbuf.st_size
         if src == dest:
             print("%s already moved"%src)
             return
@@ -195,7 +197,7 @@ class ManualImageProcessor(object):
             os.unlink(src)
             REMAINING -= 1
         else:
-            print("Rename %s to %s"%(src,dest))
+            print("Rename %s to %s (%d bytes) (%f KiB)"%(src,dest, size, size / 1024.0))
             os.rename(src,dest)
             REMAINING -= 1
 
