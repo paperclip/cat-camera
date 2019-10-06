@@ -13,26 +13,22 @@ os.chdir(r"C:\Users\windo\Documents\camera")
 
 # subprocess.call([RSYNC,"-va","douglas@pi:webdata/camera/","camera"])
 
-catDir = os.path.join("images","cat")
-
-cats = set(os.listdir(catDir))
-notcats = set(os.listdir(os.path.join("images","not_cat")))
-
-
-cameraDir = "camera"
+cameraDir = "cat"
 if len(sys.argv) > 1:
     cameraDir = sys.argv[1]
 camera = set(os.listdir(cameraDir))
 
-assert len(cats) > 0
-assert len(notcats) > 0
 
-print("Cat images %d"%len(cats))
-print("Not cat images %d"%len(notcats))
 print("Total images %d"%len(camera))
+new = camera
 
-new = camera - cats
-new -= notcats
+for d in os.listdir("images"):
+    p = os.path.join("images",d)
+    if not os.path.isdir(p):
+        continue
+    contents = set(os.listdir(p))
+    print("%s images %d"%(d,len(contents)))
+    new -= contents
 
 def safemkdir(d):
     try:
@@ -40,14 +36,19 @@ def safemkdir(d):
     except EnvironmentError:
         pass
 
+marker = "timelapse-2019-08-01-13-15-24.jpeg"
+
 for i in range(100):
     p = os.path.join("new_cat","%02d"%i)
     try:
-        new -= set(os.listdir(p))
+        contents = os.listdir(p)
     except EnvironmentError:
-        pass
+        continue
+    new -= set(contents)
+    old = [ x for x in contents if x < marker ]
+    for x in old:
+        os.unlink(os.path.join(p,x))
 
-marker = "timelapse-2018-08-12-13-15-24.jpeg"
 
 new = [ n for n in new if n > marker ]
 
@@ -86,5 +87,3 @@ for n in new:
     #~ dest = os.path.join("not_cat",n)
     #~ shutil.copy(src,dest)
     #~ print(n)
-
-
