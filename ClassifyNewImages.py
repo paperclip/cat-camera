@@ -70,10 +70,10 @@ for n in new:
         stat = os.stat(src)
         if stat.st_size < 100:
             continue
-        results = c.predict_image(src)
-        dest = os.path.join("new_cat","%02d"%(int(results[1][0]*100)))
+        topLabel, catPercentage, resultMap = c.predict_image(src)
+        dest = os.path.join("new_cat","%02d"%(int(catPercentage*100)))
         safemkdir(dest)
-        print("%s\t%s\t%s\t%d"%(src,str(results),dest,remaining))
+        print("%s\t%s\t%f\t%s\t%d\t%s"%(src,topLabel, catPercentage,dest,remaining,str(resultMap)))
         shutil.copy(src,dest)
         remaining -= 1
     except Exception as e:

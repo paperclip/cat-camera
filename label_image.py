@@ -124,16 +124,20 @@ class ImageClassify(object):
                 self.m_input_operation.outputs[0]: t
             })
 
+        ## Remove single-dimensional entries from the shape of an array.
         results = np.squeeze(results)
 
+        ## Returns the indices that would sort an array.
+        ## Then get the last 5, then reverse
         top_k = results.argsort()[-5:][::-1]
         labels = self.m_labels
-        #~ for i in top_k:
-            #~ print(labels[i], results[i])
+        resultMap = {}
+        for i in top_k:
+            resultMap[labels[i]] = results[i]
 
         self.m_count += 1
 
-        return labels[top_k[0]],[results[labels.index('cat')]]
+        return labels[top_k[0]],results[labels.index('cat')],resultMap
 
 if __name__ == "__main__":
   file_name = "tensorflow/examples/label_image/data/grace_hopper.jpg"
