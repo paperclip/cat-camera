@@ -21,4 +21,4 @@ cat/
 sizes.csv
 *.avi
 *.png
-roc.json
+roc*.json
