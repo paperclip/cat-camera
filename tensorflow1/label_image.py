@@ -24,7 +24,6 @@ import numpy as np
 import tensorflow as tf
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
-from tensorflow1 import label_image as tensorflow1_label_image
 
 def load_graph(model_file):
     graph = tf.Graph()
