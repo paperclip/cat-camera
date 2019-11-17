@@ -1,5 +1,6 @@
 #!/bin/env python
 
+import csv
 import json
 import os
 import sys
@@ -14,13 +15,19 @@ except ImportError:
     from . import label_image
     from . import findIndex
 
+def getSize(f):
+    statbuf = os.stat(f)
+    return statbuf.st_size
+
 def main(argv):
     os.chdir(r"C:\Users\windo\Documents\camera")
 
     catDir = os.path.join("images","cat")
 
-    cats = set(os.listdir(catDir))
-    notcats = set(os.listdir(os.path.join("images","not_cat")))
+    cats = list(os.listdir(catDir))
+    cats.sort(reverse=True)
+    notcats = list(os.listdir(os.path.join("images","not_cat")))
+    notcats.sort(reverse=True)
 
     ## Run predict on all
 
@@ -31,7 +38,7 @@ def main(argv):
         for imagename in cats:
             yield True, os.path.join(catDir,imagename)
             l -= 1
-            if l %100 == 0:
+            if l % 100 == 0:
                 print("Done %d cat"%(limit -l))
             if l == 0:
                 break
@@ -48,16 +55,23 @@ def main(argv):
     actuallyCatResults = []
     actuallyNotCatResults = []
 
-    for (actuallyCat, src) in generateImages(3000):
+    resultsCsvFile = open("accuracy.csv","w",newline='')
+    resultsCsv = csv.writer(resultsCsvFile)
+    resultsCsv.writerow(("IsCat","PredictedCat","Size","Basename"))
+
+    for (actuallyCat, src) in generateImages(10000):
         try:
             best_label, cat_result, resultMap = c.predict_image(src)
             if actuallyCat:
                 actuallyCatResults.append(cat_result)
             else:
                 actuallyNotCatResults.append(cat_result)
+            resultsCsv.writerow((str(actuallyCat),cat_result,getSize(src),os.path.basename(src)))
         except Exception as e:
             print("Failed to process %s"%src)
             print(e)
+
+    resultsCsvFile.close()
 
     actuallyCatResults.sort()
     actuallyNotCatResults.sort()
