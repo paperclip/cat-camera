@@ -11,13 +11,22 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 try:
     import label_image
     import findIndex
+    import generate_roc_data
 except ImportError:
     from . import label_image
     from . import findIndex
+    from . import generate_roc_data
 
 def getSize(f):
     statbuf = os.stat(f)
     return statbuf.st_size
+
+def call_generate_roc_data(actuallyCatResults, actuallyNotCatResults):
+    results = generate_roc_data.generate_roc_data(actuallyCatResults, actuallyNotCatResults)
+    open("roc.json","w").write(json.dumps(results))
+    print(results)
+
+    return 0
 
 def main(argv):
     os.chdir(r"C:\Users\windo\Documents\camera")
@@ -33,7 +42,7 @@ def main(argv):
 
     c = label_image.ImageClassify()
 
-    def generateImages(limit=10):
+    def generateImages(limit=10, cats=[], notcats=[]):
         l = limit
         for imagename in cats:
             yield True, os.path.join(catDir,imagename)
@@ -59,9 +68,9 @@ def main(argv):
     resultsCsv = csv.writer(resultsCsvFile)
     resultsCsv.writerow(("IsCat","PredictedCat","Size","Basename"))
 
-    for (actuallyCat, src) in generateImages(10000):
+    for (actuallyCat, src) in generateImages(10000, cats, notcats):
         try:
-            best_label, cat_result, resultMap = c.predict_image(src)
+            _, cat_result, _ = c.predict_image(src)
             if actuallyCat:
                 actuallyCatResults.append(cat_result)
             else:
@@ -77,27 +86,8 @@ def main(argv):
     actuallyNotCatResults.sort()
     print(actuallyCatResults, actuallyNotCatResults)
 
-    results = []
+    return generate_roc_data(actuallyCatResults, actuallyNotCatResults)
 
-    actualCatsDivisor = 0
-    notCatsDivisor = 0
-
-    for n in range(1,99):
-        actualCatsDivisor = findIndex.findIndex(actuallyCatResults, n / 100, actualCatsDivisor)
-        falseNegative = actualCatsDivisor / len(actuallyCatResults)
-        truePositive = 1 - falseNegative
-        print("+", n, actualCatsDivisor, falseNegative, truePositive)
-
-        notCatsDivisor = findIndex.findIndex(actuallyNotCatResults, n / 100, notCatsDivisor)
-        trueNegative = notCatsDivisor / len(actuallyNotCatResults)
-        falsePositive = 1 - trueNegative
-        print("-", n, notCatsDivisor, trueNegative, falsePositive)
-
-        results.append((falsePositive, truePositive))
-
-    open("roc.json","w").write(json.dumps(results))
-    print(results)
-    return 0
 
 
 if __name__ == "__main__":

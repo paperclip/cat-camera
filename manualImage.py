@@ -7,6 +7,7 @@ from __future__ import print_function
 import os
 import sys
 import re
+import json
 
 try:
     import PyQt5.QtCore as QtCore
@@ -19,6 +20,7 @@ except ImportError:
         raise ImportError("ImageViewerQt: Requires PyQt5 or PyQt4.")
 
 import viewImage
+import tensorflow1.generate_roc_data
 
 category=[]
 
@@ -70,8 +72,51 @@ def newCat(imageProcessor):
 
     imageProcessor.close()
 
+def getPrediction(imagePath):
+    p = imagePath
+    while True:
+        p, b = os.path.split(p)
+        try:
+            return int(b)
+        except ValueError:
+            pass
+        if b == "":
+            break
+    return 0
+
+class ImageDetails(object):
+    def __init__(self, src):
+        self.__m_src = src
+        self.__m_prediction = getPrediction(src)
+
+    def is_cat(self, actuallyCat=True):
+        self.__m_is_cat = actuallyCat
+    
+    def get_is_cat(self):
+        return self.__m_is_cat
+
+    def get_prediction(self):
+        return self.__m_prediction
+
+def save_results(results):
+    actuallyCatResults = []
+    actuallyNotCatResults = []
+    for r in results.values():
+        prediction = r.get_prediction()
+        if r.get_is_cat():
+            actuallyCatResults.append(prediction)
+        else:
+            actuallyNotCatResults.append(prediction)
+
+    if len(actuallyCatResults) == 0 or len(actuallyNotCatResults) == 0:
+        return 
+
+    results = tensorflow1.generate_roc_data.generate_roc_data(actuallyCatResults, actuallyNotCatResults)
+    open("roc.json","w").write(json.dumps(results))
+
 class ManualImageProcessor(object):
     def __init__(self):
+        self.m_results = {}
         self.m_truePositive = 0
         self.m_trueNegative = 0
         self.m_falsePostive = 0
@@ -87,11 +132,15 @@ class ManualImageProcessor(object):
         REMAINING = total()
         self.nextImage()
         self.m_viewer.show()
+        self.m_closed = False
 
     def close(self):
-        print("Killing")
-        self.outputCounts()
-        self.m_viewer.deleteLater()
+        if not self.m_closed:
+            print("Killing")
+            self.outputCounts()
+            save_results(self.m_results)
+            self.m_viewer.deleteLater()
+            self.m_closed = True
 
 
     def on_key(self, event):
@@ -148,23 +197,33 @@ class ManualImageProcessor(object):
             return p
         return self.m_imageName
 
-    def isPredictedCat(self):
-        p = self.m_imageName
-        while True:
-            p, b = os.path.split(p)
-            try:
-                return int(b) >= 50
-            except ValueError:
-                pass
-            if b == "":
-                break
-
-        return False
-
-    def updateCounts(self, dest):
-        predictedCat = self.isPredictedCat()
+    def updateCounts(self, src, dest):
+        global REMAINING
+        base = os.path.basename(src)
+        prediction = getPrediction(self.m_imageName)
+        predictedCat = prediction >= 50
         actualCat = "not_cat" not in dest
-        print("predicted = %r, actual = %r"%(predictedCat,actualCat))
+        print("predicted = %r (%d), actual = %r"%(predictedCat, prediction, actualCat))
+        self.m_results[base].is_cat(actualCat)
+
+        if "new_cat" not in src:
+            REMAINING += 1
+            ## subtract out error
+            if "not_cat" in src:
+                ## moving from not_cat to cat
+                assert actualCat
+                if predictedCat:
+                    ## we predicted cat, and it actually was a cat
+                    self.m_falsePostive -= 1
+                else:
+                    self.m_trueNegative -= 1
+            else:
+                ## moving from cat to not_cat
+                assert not actualCat
+                if predictedCat:
+                    self.m_truePositive -= 1
+                else:
+                    self.m_falseNegative -= 1
 
         if predictedCat:
             if actualCat:
@@ -177,7 +236,6 @@ class ManualImageProcessor(object):
             else:
                 self.m_trueNegative += 1
 
-
     def moveImage(self, *dest):
         base = os.path.basename(self.m_imageName)
         src = self.src()
@@ -189,7 +247,7 @@ class ManualImageProcessor(object):
             return
 
         ## Update counts
-        self.updateCounts(dest)
+        self.updateCounts(src, dest)
         global REMAINING
 
         if os.path.isfile(dest):
@@ -204,6 +262,8 @@ class ManualImageProcessor(object):
     def setImage(self, imageName):
         self.m_imageName = imageName
         src = self.src()
+        if "new_cat" in src:
+            self.m_results[os.path.basename(src)] = ImageDetails(src)
         self.m_viewer.loadImageFromFile(src)
 
     def outputCounts(self):
