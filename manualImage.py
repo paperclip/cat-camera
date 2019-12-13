@@ -88,10 +88,12 @@ class ImageDetails(object):
     def __init__(self, src):
         self.__m_src = src
         self.__m_prediction = getPrediction(src)
+        if self.__m_prediction == 0:
+            print("0:",src)
 
     def is_cat(self, actuallyCat=True):
         self.__m_is_cat = actuallyCat
-    
+
     def get_is_cat(self):
         return self.__m_is_cat
 
@@ -109,7 +111,13 @@ def save_results(results):
             actuallyNotCatResults.append(prediction)
 
     if len(actuallyCatResults) == 0 or len(actuallyNotCatResults) == 0:
-        return 
+        return
+
+    actuallyCatResults.sort()
+    actuallyNotCatResults.sort()
+
+    open("actuallyCatResults.json","w").write(json.dumps(actuallyCatResults))
+    open("actuallyNotCatResults.json","w").write(json.dumps(actuallyNotCatResults))
 
     results = tensorflow1.generate_roc_data.generate_roc_data(actuallyCatResults, actuallyNotCatResults)
     open("roc.json","w").write(json.dumps(results))

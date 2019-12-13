@@ -5,6 +5,7 @@ import os
 import sys
 import numpy as np
 from matplotlib import pyplot
+import matplotlib.lines as lines
 
 def main(argv):
     os.chdir(r"C:\Users\windo\Documents\camera")
@@ -19,6 +20,7 @@ def main(argv):
     fpr, tpr = zip(*results)
 
     pyplot.plot(fpr, tpr)
+    pyplot.plot([0,1],[0,1], "k-", lw=1, dashes=[2,2])
     pyplot.xlabel("Cat False Positive Rate")
     pyplot.ylabel("Cat True Positive Rate")
     pyplot.title("Cat TensorFlow1 ROC Curve")
