@@ -9,7 +9,8 @@ import sys
 
 RSYNC=r"F:\cygwin64\bin\rsync"
 
-os.chdir(r"C:\Users\windo\Documents\camera")
+import tensorflow1.camera_dir
+tensorflow1.camera_dir.cd_camera_dir()
 
 # subprocess.call([RSYNC,"-va","douglas@pi:webdata/camera/","camera"])
 

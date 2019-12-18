@@ -7,8 +7,13 @@ import numpy as np
 from matplotlib import pyplot
 import matplotlib.lines as lines
 
+try:
+    import camera_dir
+except ImportError:
+    from . import camera_dir
+
 def main(argv):
-    os.chdir(r"C:\Users\windo\Documents\camera")
+    camera_dir.cd_camera_dir()
 
     filename = "roc.json"
     if len(argv) > 1:

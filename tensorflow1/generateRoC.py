@@ -12,10 +12,12 @@ try:
     import label_image
     import findIndex
     import generate_roc_data
+    import camera_dir
 except ImportError:
     from . import label_image
     from . import findIndex
     from . import generate_roc_data
+    from . import camera_dir
 
 def getSize(f):
     statbuf = os.stat(f)
@@ -29,7 +31,7 @@ def call_generate_roc_data(actuallyCatResults, actuallyNotCatResults):
     return 0
 
 def main(argv):
-    os.chdir(r"C:\Users\windo\Documents\camera")
+    camera_dir.cd_camera_dir()
 
     catDir = os.path.join("images","cat")
 

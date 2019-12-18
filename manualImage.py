@@ -21,10 +21,11 @@ except ImportError:
 
 import viewImage
 import tensorflow1.generate_roc_data
+import tensorflow1.camera_dir
+tensorflow1.camera_dir.cd_camera_dir()
 
 category=[]
 
-os.chdir(r"C:\Users\windo\Documents\camera")
 
 # subprocess.call([RSYNC,"-va","douglas@pi:webdata/camera/","camera"])
 
