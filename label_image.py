@@ -20,15 +20,17 @@ from __future__ import print_function
 import argparse
 
 import os
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+
 import numpy as np
 import tensorflow as tf
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
 from tensorflow1 import label_image as tensorflow1_label_image
 
 def load_graph(model_file):
     graph = tf.Graph()
-    graph_def = tf.GraphDef()
+    # graph_def = tf.GraphDef()
+    graph_def = tf.compat.v1.GraphDef()
 
     with open(model_file, "rb") as f:
       graph_def.ParseFromString(f.read())
@@ -49,7 +51,7 @@ def read_tensor_from_image_file(file_name,
     input_name = "file_reader"
     output_name = "normalized"
     with tf.Graph().as_default(), tf.Session() as sess:
-        file_reader = tf.read_file(file_name, input_name)
+        file_reader = tf.io.read_file(file_name, input_name)
         if file_name.endswith(".png"):
             image_reader = tf.image.decode_png(
                 file_reader, channels=3, name="png_reader")
@@ -63,7 +65,7 @@ def read_tensor_from_image_file(file_name,
                 file_reader, channels=3, name="jpeg_reader")
         float_caster = tf.cast(image_reader, tf.float32)
         dims_expander = tf.expand_dims(float_caster, 0)
-        resized = tf.image.resize_bilinear(dims_expander, [input_height, input_width])
+        resized = tf.compat.v1.image.resize_bilinear(dims_expander, [input_height, input_width])
         normalized = tf.divide(tf.subtract(resized, [input_mean]), [input_std])
 
         #~ if sess is None:
@@ -84,8 +86,8 @@ def load_labels(label_file):
 
 class ImageClassify(object):
     def __init__(self):
-        model_file = \
-        "cat_retrained.pb"
+        model_file = "cat_retrained.pb"
+        self.m_model_version = os.stat(model_file).st_mtime
         label_file = "cat_labels.txt"
         self.m_input_height = 299
         self.m_input_width = 299

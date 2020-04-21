@@ -88,6 +88,7 @@ def getPrediction(imagePath):
 class ImageDetails(object):
     def __init__(self, src):
         self.__m_src = src
+        self.__m_is_cat = False
         self.__m_prediction = getPrediction(src)
         if self.__m_prediction == 0:
             print("0:",src)

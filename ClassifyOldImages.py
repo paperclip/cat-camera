@@ -8,6 +8,7 @@ import os
 import shutil
 import subprocess
 import time
+import tinydb
 
 catDir = os.path.join("images","cat")
 cats = os.listdir(catDir)
@@ -71,4 +72,3 @@ finally:
         print("Recall = %f"% (1.0*truePositive / (truePositive + falseNegative)))
     if truePositive + falsePostive > 0:
         print("Precision = %f"%(1.0*truePositive / (truePositive + falsePostive)))
-

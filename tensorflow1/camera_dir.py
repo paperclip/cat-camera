@@ -1,4 +1,7 @@
 import os
 
 def cd_camera_dir():
-    os.chdir(r"F:\Camera\camera")
+    if os.path.isdir("/home/douglas/camera"):
+        os.chdir("/home/douglas/camera")
+    else:
+        os.chdir(r"I:\Camera\camera")
