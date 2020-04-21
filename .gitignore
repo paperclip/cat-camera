@@ -6,6 +6,7 @@ images/
 log/
 other_images/
 retrain_logs/
+annotations/
 checkpoint
 cat_labels.txt
 cat_retrained.pb
@@ -24,3 +25,4 @@ sizes.csv
 roc*.json
 *.csv
 *.json
+*.db
