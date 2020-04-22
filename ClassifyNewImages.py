@@ -1,6 +1,7 @@
 #!/bin/env python
 
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import shutil
 import subprocess
 import sys
@@ -10,11 +11,15 @@ tensorflow1.camera_dir.cd_camera_dir()
 import tensorflow1.utils
 safemkdir = tensorflow1.utils.safemkdir
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 tensorflow.get_logger().setLevel('ERROR')
 
 import label_image as classifier
+
+import database.db
+db = database.db.Database()
 
 ## rsync -va douglas@pi:webdata/camera/ camera
 
@@ -61,8 +66,6 @@ print("New images %d"%(len(new)))
 
 c = classifier.ImageClassify()
 model_version = "classify1_%d" % int(c.m_model_version)
-database = tinydb.TinyDB("./cat.db.json")
-tinydb_query = tinydb.Query()
 
 ## ['cat', 'not_cat'], image_size=100, learning_rate=0.001)
 ## c.load_model('cat_water')
@@ -80,13 +83,13 @@ for n in new:
         safemkdir(dest)
         print("%s\t%s\t%f\t%s\t%d\t%s"%(src,topLabel, catPercentage,dest,remaining,str(resultMap)))
         shutil.copy(src,dest)
-        database.upsert({"name": n, model_version : float(catPercentage * 100)}, tinydb_query.name == n)
+        db.addValue(n, model_version, float(catPercentage * 100))
         remaining -= 1
     except Exception as e:
         print("Failed to process %s"%src)
         print(e)
 
-print("Database size ", len(database))
+db.close()
 
 #~ for n in new:
     #~ src = os.path.join("camera",n)
