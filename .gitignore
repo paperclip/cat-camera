@@ -26,6 +26,7 @@ roc*.json
 *.csv
 *.json
 *.db
+*.db_unqlite_journal
 object_detection_training/ssd_inception_v2_coco_2018_01_28.tar.gz
 object_detection_training/pre-trained-model/ssd_inception_v2_coco_2018_01_28/
 object_detection_training/trained-inference-graphs/output_inference_graph_v1.pb/
