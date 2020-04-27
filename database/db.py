@@ -6,7 +6,9 @@ import sys
 
 class Database(object):
     def __init__(self):
-        self.m_db = UnQLite("cat.unqlite.db")
+        database_script_dir = os.path.abspath(os.path.dirname(__file__))
+        camera_dir = os.path.dirname(database_script_dir)
+        self.m_db = UnQLite(os.path.join(camera_dir, "cat.unqlite.db"))
         self.m_collection = self.m_db.collection("images")
         self.m_collection.create()
         self.m_slow_lookups = 0
