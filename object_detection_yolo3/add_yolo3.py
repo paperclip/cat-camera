@@ -1,4 +1,5 @@
 
+import os
 import sys
 
 try:
@@ -37,7 +38,8 @@ def add_yolo3(record):
     if image_path is None:
         print("Can't locate",record['name'])
         return updated
-        
+
+    image_path = os.path.join(database.db.GL_CAMERA_DIR, image_path)
     result = predict(image_path)
 
     record['yolo3_cat'] = result.get('cat', 0.0)

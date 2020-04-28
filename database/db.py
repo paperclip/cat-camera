@@ -4,10 +4,12 @@ from unqlite import UnQLite
 import os
 import sys
 
+GL_DATABASE_SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
+GL_CAMERA_DIR = os.path.dirname(GL_DATABASE_SCRIPT_DIR)
+
 class Database(object):
     def __init__(self):
-        database_script_dir = os.path.abspath(os.path.dirname(__file__))
-        camera_dir = os.path.dirname(database_script_dir)
+        camera_dir = GL_CAMERA_DIR
         self.m_db = UnQLite(os.path.join(camera_dir, "cat.unqlite.db"))
         self.m_collection = self.m_db.collection("images")
         self.m_collection.create()

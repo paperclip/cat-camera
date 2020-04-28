@@ -34,6 +34,7 @@ def add_date_info(m):
 
 
 def add_file_location(m):
+    camera_dir = db.GL_CAMERA_DIR
     if "name" not in m:
         print("Invalid entry?", repr(m))
         return False
@@ -44,20 +45,20 @@ def add_file_location(m):
 
     filename = m['name']
 
-    p = os.path.join("images", "cat", filename)
-    if os.path.isfile(p):
-        m['current_location'] = p
-        return True
+    def try_dir(p):
+        if os.path.isfile(os.path.join(camera_dir, p)):
+            m['current_location'] = p
+            return True
+        return False
 
-    p = os.path.join("images", "not_cat", filename)
-    if os.path.isfile(p):
-        m['current_location'] = p
+    if (
+        try_dir(os.path.join("images", "cat", filename)) or
+        try_dir(os.path.join("images", "not_cat", filename))
+        ):
         return True
 
     for i in range(100):
-        p = os.path.join("new_cat", "%2d"%i, filename)
-        if os.path.isfile(p):
-            m['current_location'] = p
+        if try_dir(os.path.join("new_cat", "%2d"%i, filename)):
             return True
 
     return False
