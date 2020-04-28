@@ -33,7 +33,11 @@ def add_yolo3(record):
     if "yolo3" in record:
         return updated
 
-    image_path = record['current_location']
+    image_path = record.get('current_location', None)
+    if image_path is None:
+        print("Can't locate",record['name'])
+        return updated
+        
     result = predict(image_path)
 
     record['yolo3_cat'] = result.get('cat', 0.0)
@@ -48,14 +52,10 @@ def add_yolo3(record):
     return True
 
 
-def add_yolo3_to_all_record(data):
-    count = 2000
+def add_yolo3_to_all_record(data, max_count=200):
+    count = max_count
     for v in data.m_collection:
         if v is None:
-            break
-
-        count -= 1
-        if count == 0:
             break
 
         updated = add_yolo3(v)
@@ -64,12 +64,21 @@ def add_yolo3_to_all_record(data):
             print(repr(v))
             data.updateRecord(v)
 
+            count -= 1
+            if count == 0:
+                break
+
+
 
 def main(argv):
     data = database.db.Database()
 
+    max_count = 200
+    if len(argv) > 1:
+        max_count = int(argv[1])
+
     try:
-        add_yolo3_to_all_record(data)
+        add_yolo3_to_all_record(data, max_count)
     finally:
         data.close()
     return 0
