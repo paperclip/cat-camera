@@ -26,6 +26,7 @@ tensorflow1.camera_dir.cd_camera_dir()
 
 category=[]
 
+import database.db
 
 # subprocess.call([RSYNC,"-va","douglas@pi:webdata/camera/","camera"])
 
@@ -85,9 +86,12 @@ def getPrediction(imagePath):
             break
     return 0
 
+GL_DB = database.db.Database()
+
 class ImageDetails(object):
     def __init__(self, src):
         self.__m_src = src
+        self.__m_record = GL_DB.getRecord(os.path.basename(src))
         self.__m_is_cat = False
         self.__m_prediction = getPrediction(src)
         if self.__m_prediction == 0:
@@ -95,6 +99,8 @@ class ImageDetails(object):
 
     def is_cat(self, actuallyCat=True):
         self.__m_is_cat = actuallyCat
+        self.__m_record['cat'] = 1 if actuallyCat else 0
+        GL_DB.updateRecord(self.__m_record)
 
     def get_is_cat(self):
         return self.__m_is_cat
@@ -147,8 +153,8 @@ class ManualImageProcessor(object):
     def close(self):
         if not self.m_closed:
             print("Killing")
-            self.outputCounts()
             save_results(self.m_results)
+            self.outputCounts()
             self.m_viewer.deleteLater()
             self.m_closed = True
 
@@ -300,6 +306,7 @@ def main(argv):
         return app.exec_()
     finally:
         processor.close()
+        GL_DB.close()
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
