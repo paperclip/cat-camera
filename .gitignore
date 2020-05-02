@@ -32,3 +32,6 @@ object_detection_training/pre-trained-model/ssd_inception_v2_coco_2018_01_28/
 object_detection_training/trained-inference-graphs/output_inference_graph_v1.pb/
 object_detection_training/training/events.out.tfevents.*
 object_detection_training/training/model.ckpt-*
+cat-decision-tree.dot
+cat-decision-tree.gv
+Source.gv
