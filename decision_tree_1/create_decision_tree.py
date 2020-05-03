@@ -12,68 +12,67 @@ except ImportError:
 import database.db
 
 from sklearn import tree
-import sklearn.tree.export
+import sklearn.tree
+# import sklearn.tree.export
 
 import graphviz
 
 GL_YOLO3_CATEGORIES = [
     "cat",
     "dog",
-    'sports ball',
-    'chair',
-    'pottedplant',
-    'tvmonitor',
     'person',
-    'remote',
+    'bed',
+    'sofa',
+    'chair',
+    'diningtable',
+    'sports ball',
+    'pottedplant',
+    'cup',
     'bowl',
-    'vase',
     'bottle',
+    'wine glass',
+    'vase',
     'bicycle',
+    'tvmonitor',
+    'laptop',
+    'remote',
     'cell phone',
-
-    None,
+    'backpack',
+    'refrigerator',
+    None, 
 ]
 
 GL_YOLO3_REVERSE_CATEGORY_MAP = { v:k for (k,v) in enumerate(GL_YOLO3_CATEGORIES) }
 
-def inner_main(data, count):
+def getFeature(feature, record):
+    if feature in (
+        'yolo3_cat',
+        'yolo3_dog',):
+        return record[feature] or 0.0
+
+    if feature == 'yolo3':
+        return GL_YOLO3_REVERSE_CATEGORY_MAP[record[feature]]
+
+    return record[feature]
+
+
+def print_decision_tree(data, count, feature_labels, max_depth=5):
     print("Start")
     # print(GL_YOLO3_REVERSE_CATEGORY_MAP)
     X = []
     y = []
     result_labels = ["not_cat", "cat"]
-    feature_labels = [
-        'year',
-        'month',
-        'day_of_month',
-        'day_of_week',
-        'hour',
-        'minute',
-        'size',
-        'yolo3_cat',
-        'yolo3_dog',
-        'yolo3',
-        'classify1',
-    ]
-    clf = tree.DecisionTreeClassifier(random_state=0, max_depth=5)
+    clf = tree.DecisionTreeClassifier(random_state=0, max_depth=max_depth)
     for r in generate_data.generate_records(data, count):
-        X.append([
-            r['year'],
-            r['month'],
-            r['day_of_month'],
-            r['day_of_week'],
-            r['hour'],
-            r['minute'],
-            r['size'],
-            r['yolo3_cat'] or 0.0,
-            r['yolo3_dog'] or 0.0,
-            GL_YOLO3_REVERSE_CATEGORY_MAP[r['yolo3']],
-            r['classify1'],
-        ])
+        X.append([ getFeature(f, r) for f in feature_labels ])
         y.append(r['cat'])
-    print(X,y)
+    # print(X,y)
+    if len(X) != 2 * count:
+        print("Failed to get enough records")
+        print(X, y)
+        raise Exception("Failed to get enough records")
     clf = clf.fit(X, y)
-    text_tree = sklearn.tree.export.export_text(clf, feature_labels)
+    text_tree = sklearn.tree.export_text(clf, feature_labels)
     print(text_tree)
     tree.plot_tree(clf)
     tree.export_graphviz(clf, out_file="cat-decision-tree.dot",
@@ -86,6 +85,23 @@ def inner_main(data, count):
     # graph.view()
     print("End")
 
+
+def inner_main(data, count):
+    # feature_labels = [
+    #     'year',
+    #     'month',
+    #     'day_of_month',
+    #     'day_of_week',
+    #     'hour',
+    #     'minute',
+    #     'size',
+    #     'yolo3_cat',
+    #     'yolo3_dog',
+    #     'yolo3',
+    #     'classify1',
+    # ]
+    feature_labels = ['classify1', 'yolo3_cat', 'size', 'hour', 'minute', 'day_of_week']
+    return print_decision_tree(data, count, feature_labels)
 
 def main(argv):
     count = 10
