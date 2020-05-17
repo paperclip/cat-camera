@@ -7,15 +7,43 @@ import sys
 GL_DATABASE_SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 GL_CAMERA_DIR = os.path.dirname(GL_DATABASE_SCRIPT_DIR)
 
+
+## Flags not exposed by python-unqlite
+# cdef int UNQLITE_OPEN_READONLY = 0x00000001
+# cdef int UNQLITE_OPEN_READWRITE = 0x00000002
+# cdef int UNQLITE_OPEN_CREATE = 0x00000004
+# cdef int UNQLITE_OPEN_EXCLUSIVE = 0x00000008
+# cdef int UNQLITE_OPEN_TEMP_DB = 0x00000010
+# cdef int UNQLITE_OPEN_NOMUTEX = 0x00000020
+# cdef int UNQLITE_OPEN_OMIT_JOURNALING = 0x00000040
+# cdef int UNQLITE_OPEN_IN_MEMORY = 0x00000080
+# cdef int UNQLITE_OPEN_MMAP = 0x00000100
+UNQLITE_OPEN_READONLY  = 0x00000001
+UNQLITE_OPEN_READWRITE = 0x00000002
+UNQLITE_OPEN_CREATE    = 0x00000004
+
+
 class Database(object):
-    def __init__(self):
+    def __init__(self, write=True):
         camera_dir = GL_CAMERA_DIR
-        self.m_db = UnQLite(os.path.join(camera_dir, "cat.unqlite.db"))
+        if write:
+            flags = UNQLITE_OPEN_CREATE
+        else:
+            flags = UNQLITE_OPEN_READONLY
+        self.m_db = UnQLite(os.path.join(camera_dir, "cat.unqlite.db"), flags)
         self.m_collection = self.m_db.collection("images")
         self.m_collection.create()
         self.m_slow_lookups = 0
         self.m_quick_lookups = 0
         self.m_new_records = 0
+        self.m_writable = write
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+        return False
 
     def close(self):
         print("Database size = ", self.size())
@@ -69,6 +97,9 @@ class Database(object):
             record[key] = value
             self.m_collection.update(record['__id'], record)
         return record
+
+    def get_record_by_id(self, id_value):
+        return self.m_collection[id_value]
 
     def updateRecord(self, record):
         self.m_collection.update(record['__id'], record)

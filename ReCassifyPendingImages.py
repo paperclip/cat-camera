@@ -24,8 +24,6 @@ import label_image as classifier
 c = classifier.ImageClassify()
 model_version = "classify1_%d" % int(c.m_model_version)
 
-db = database.db.Database()
-
 def newCat():
     for base in range(100,-1,-1):
         directory = os.path.join("new_cat","%02d"%base)
@@ -36,7 +34,7 @@ def newCat():
             yield os.path.join(directory,p)
 
 
-def inner_main():
+def inner_main(db):
     pending = list(newCat())
     remaining = len(pending)
     print("Total=", remaining)
@@ -61,11 +59,10 @@ def inner_main():
             print(e)
             raise
 
+
 def main(argv):
-    try:
-        inner_main()
-    finally:
-        db.close()
+    with database.db.Database() as db:
+        inner_main(db)
     return 0
 
 if __name__ == '__main__':
