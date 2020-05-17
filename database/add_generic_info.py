@@ -58,7 +58,7 @@ def add_file_location(m):
         return True
 
     for i in range(100):
-        if try_dir(os.path.join("new_cat", "%2d"%i, filename)):
+        if try_dir(os.path.join("new_cat", "%02d"%i, filename)):
             return True
 
     return False
@@ -90,11 +90,8 @@ def add_generic_info(data):
 
 
 def main(argv):
-    data = db.Database()
-    try:
+    with db.Database() as data:
         add_generic_info(data)
-    finally:
-        data.close()
 
     return 0
 
