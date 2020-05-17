@@ -28,11 +28,16 @@ def max_result(result):
             r = result
     return r
 
-def add_yolo3(record):
-    updated = database.add_generic_info.add_file_location(record)
+CAT_RESULTS = []
 
-    if "yolo3" in record:
-        return updated
+def add_yolo3(record, force=False):
+    global CAT_RESULTS
+
+    if force is False:
+        if "yolo3" in record and record.get("yolo3_cat") is not None:
+            return False
+
+    updated = database.add_generic_info.add_file_location(record)
 
     image_path = record.get('current_location', None)
     if image_path is None:
@@ -42,8 +47,15 @@ def add_yolo3(record):
     image_path = os.path.join(database.db.GL_CAMERA_DIR, image_path)
     result = predict(image_path)
 
-    record['yolo3_cat'] = result.get('cat', 0.0)
-    record['yolo3_dog'] = result.get('dog', 0.0)
+    cat_result = float(result.get('cat', 0.0))
+    record['yolo3_cat'] = cat_result
+    record['yolo3_dog'] = float(result.get('dog', 0.0))
+
+    if cat_result > 0.0:
+        print("***** CAT:",cat_result,record['name'])
+        CAT_RESULTS.append(record)
+    else:
+        print("no cat:",record['name'])
 
     record['yolo3'] = max_result(result)
 
@@ -73,16 +85,16 @@ def add_yolo3_to_all_record(data, max_count=200):
 
 
 def main(argv):
-    data = database.db.Database()
-
     max_count = 200
     if len(argv) > 1:
         max_count = int(argv[1])
 
-    try:
+    with database.db.Database() as data:
         add_yolo3_to_all_record(data, max_count)
-    finally:
-        data.close()
+
+    for c in CAT_RESULTS:
+        print(repr(c))
+
     return 0
 
 
