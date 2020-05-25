@@ -20,6 +20,7 @@ import graphviz
 GL_YOLO3_CATEGORIES = [
     "cat",
     "dog",
+    'bird',
     'person',
     'bed',
     'sofa',
@@ -32,11 +33,16 @@ GL_YOLO3_CATEGORIES = [
     'bottle',
     'wine glass',
     'vase',
+    'clock',
     'bicycle',
-    'tvmonitor',
-    'laptop',
+    'truck',
+    'book',
+    'handbag',
+    'suitcase',
     'remote',
     'cell phone',
+    'tvmonitor',
+    'laptop',
     'backpack',
     'refrigerator',
     None, 
@@ -53,26 +59,49 @@ def getFeature(feature, record):
     if feature == 'yolo3':
         return GL_YOLO3_REVERSE_CATEGORY_MAP[record[feature]]
 
+    if feature == "time":
+        return record['hour'] + record['minute'] / 60.0
+
     return record[feature]
 
 
-def print_decision_tree(data, count, feature_labels, max_depth=5):
+def print_decision_tree(data, feature_labels, max_depth=5):
     print("Start")
     # print(GL_YOLO3_REVERSE_CATEGORY_MAP)
+    result_labels = ["not_cat", "cat"]
+
+    cat_records = []
+    not_cat_records = []
+    for r in generate_data.generate_records(data):
+        if r['cat'] == 1:
+            cat_records.append(r)
+        else:
+            not_cat_records.append(r)
+
+    assert len(cat_records) < len(not_cat_records)
+
+    cr = len(cat_records)
+    pos = len(not_cat_records) - cr
+
+    not_cat_records = not_cat_records[pos:]
+    assert len(cat_records) == len(not_cat_records)
+
     X = []
     y = []
-    result_labels = ["not_cat", "cat"]
-    clf = tree.DecisionTreeClassifier(random_state=0, max_depth=max_depth)
-    for r in generate_data.generate_records(data, count):
-        X.append([ getFeature(f, r) for f in feature_labels ])
+    for r in cat_records:
+        X.append([getFeature(f, r) for f in feature_labels])
         y.append(r['cat'])
-    # print(X,y)
-    if len(X) != 2 * count:
-        print("Failed to get enough records")
-        print(X, y)
-        raise Exception("Failed to get enough records")
+    for r in not_cat_records:
+        X.append([getFeature(f, r) for f in feature_labels])
+        y.append(r['cat'])
+
+    print("Classify for %d records" % len(X))
+
+    assert len(X) == len(y)
+
+    clf = tree.DecisionTreeClassifier(random_state=0, max_depth=max_depth, min_impurity_decrease=0.005)
     clf = clf.fit(X, y)
-    text_tree = sklearn.tree.export_text(clf, feature_labels)
+    text_tree = sklearn.tree.export_text(clf, feature_labels, show_weights=True)
     print(text_tree)
     tree.plot_tree(clf)
     tree.export_graphviz(clf, out_file="cat-decision-tree.dot",
@@ -86,7 +115,7 @@ def print_decision_tree(data, count, feature_labels, max_depth=5):
     print("End")
 
 
-def inner_main(data, count):
+def inner_main(data):
     # feature_labels = [
     #     'year',
     #     'month',
@@ -100,18 +129,13 @@ def inner_main(data, count):
     #     'yolo3',
     #     'classify1',
     # ]
-    feature_labels = ['classify1', 'yolo3_cat', 'size', 'hour', 'minute', 'day_of_week']
-    return print_decision_tree(data, count, feature_labels)
+    feature_labels = ['classify1', 'yolo3_cat', 'size',
+                      'time', 'day_of_week']  # , 'yolo3'
+    return print_decision_tree(data, feature_labels)
 
 def main(argv):
-    count = 10
-    if len(argv) > 1:
-        count = int(argv[1])
-    data = database.db.Database()
-    try:
-        inner_main(data, count)
-    finally:
-        data.close()
+    with database.db.Database() as data:
+        inner_main(data)
 
     return 0
 

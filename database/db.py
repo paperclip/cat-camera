@@ -103,6 +103,7 @@ class Database(object):
 
     def updateRecord(self, record):
         self.m_collection.update(record['__id'], record)
+        self.m_db[record['name']] = record['__id']
         return record
 
     def debug(self, imageName):

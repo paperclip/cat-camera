@@ -28,8 +28,10 @@ def best_classify1(record):
     if best_v is not None:
         record['classify1'] = best_v
 
+    return best_v
 
-def generate_records(data, count, debug=False):
+
+def generate_records(data, count=999999, debug=False):
     """
     Generate count cats and count not_cats which have full details
     """
@@ -63,6 +65,11 @@ def generate_records(data, count, debug=False):
         if cat_count >= count and not_cat_count >= count:
             break
 
+    
+    if cat_count < count:
+        print("Run out of cat records!")
+    if not_cat_count < count:
+        print("Run out of not_cat records!")
 
 
 

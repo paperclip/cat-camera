@@ -77,6 +77,8 @@ def add_file_size(m):
 
 def add_generic_info(data):
     print("Start")
+    start = time.time()
+    n = 0 
     for v in data.m_collection:
         if v is None:
             break
@@ -86,7 +88,9 @@ def add_generic_info(data):
         if updated:
             print(repr(v))
             data.updateRecord(v)
-    print("End")
+            n += 1
+    end = time.time()
+    print("End: Updated %d records in %f seconds" % (n, end - start))
 
 
 def main(argv):

@@ -1,6 +1,7 @@
 
 import os
 import sys
+import time
 
 try:
     from . import predict_image
@@ -67,6 +68,10 @@ def add_yolo3(record, force=False):
 
 
 def add_yolo3_to_all_record(data, max_count=200):
+    start = time.time()
+    
+    n = 0
+    skipped = 0
     count = max_count
     for v in data.m_collection:
         if v is None:
@@ -75,13 +80,21 @@ def add_yolo3_to_all_record(data, max_count=200):
         updated = add_yolo3(v)
 
         if updated:
+            if skipped > 0:
+                print("Skipped",skipped)
             print(repr(v))
             data.updateRecord(v)
 
+            n += 1
+            skipped = 0
             count -= 1
             if count == 0:
                 break
+        else:
+            skipped += 1
 
+    end = time.time()
+    print("Updated %d records in %f seconds" % (n, end - start))
 
 
 def main(argv):
