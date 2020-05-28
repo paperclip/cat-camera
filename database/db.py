@@ -55,13 +55,13 @@ class Database(object):
     def size(self):
         return len(self.m_collection)
 
-    def addValue(self, imageName, key, value):
+    def addValue(self, imageName, key, value, assumeFast=False):
         """
         Combines getRecord and updateRecord for a single value
         """
-        return self.getRecord(imageName, key, value)
+        return self.getRecord(imageName, key, value, assumeFast=assumeFast)
 
-    def getRecord(self, imageName, key=None, value=None):
+    def getRecord(self, imageName, key=None, value=None, assumeFast=False):
         """
         Get a record for an imageName, or create it if absent
         """
@@ -72,8 +72,11 @@ class Database(object):
             self.m_quick_lookups += 1
         else:
             # self.debug(imageName)
-            records = self.m_collection.filter(
-                lambda record: record['name'] == imageName)
+            if assumeFast:
+                records = []
+            else:
+                records = self.m_collection.filter(
+                    lambda record: record['name'] == imageName)
             if len(records) == 0:
                 self.m_new_records += 1
                 print("New record", imageName)
