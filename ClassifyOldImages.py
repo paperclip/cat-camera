@@ -49,17 +49,20 @@ if len(sys.argv) > 1:
 else:
     count = 100
 
+new_result_count = 0
+
 try:
     for i in cats[:count]:
         before = time.time()
         src = os.path.join(catDir, i)
-        record = db.getRecord(i, 'cat', 1)
+        record = db.getRecord(i, 'cat', 1, assumeFast=True)
         if record.get(model_version, None) is None:
             newPredict = "NEW"
             topLabel, catPercentage, resultMap = c.predict_image(src)
             catPercentage = catPercentage * 100
             record[model_version] = float(catPercentage)
             db.updateRecord(record)
+            new_result_count += 1
         else:
             newPredict = ""
             catPercentage = record[model_version]
@@ -76,13 +79,14 @@ try:
     for i in notcats[:count]:
         before = time.time()
         src = os.path.join(notcatsDir, i)
-        record = db.getRecord(i, 'cat', 0)
+        record = db.getRecord(i, 'cat', 0, assumeFast=True)
         if record.get(model_version, None) is None:
             newPredict = "NEW"
             topLabel, catPercentage, resultMap = c.predict_image(src)
             catPercentage = catPercentage * 100
             record[model_version] = float(catPercentage)
             db.updateRecord(record)
+            new_result_count += 1
         else:
             newPredict = ""
             catPercentage = record[model_version]
@@ -101,6 +105,7 @@ except KeyboardInterrupt as e:
     pass
 finally:
     db.close()
+    print("New results:", new_result_count)
 
     print("True Positive  = %d"%truePositive)
     print("True Negative  = %d"%trueNegative)

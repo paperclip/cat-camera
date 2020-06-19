@@ -20,13 +20,14 @@ def predict_image(image_path, detector, class_labels):
     image = image[:, :, ::-1]
 
     # 3. Run detection
-    boxes, labels, probs = detector.detect(image, 0.5)
+    boxes, labels, probs = detector.detect(image, 0.1)
 
     # print(list(zip(labels, probs)))
 
     result = {}
     for (l, p) in zip(labels, probs):
-        result[class_labels[l]] = p
+        label = class_labels[l]
+        result[label] = max(float(p), result.get(label, 0.0))
 
     # # 4. draw detected boxes
     # visualize_boxes(image, boxes, labels, probs, config_parser.get_labels())

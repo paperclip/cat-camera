@@ -45,6 +45,9 @@ class Database(object):
         self.close()
         return False
 
+    def commit(self):
+        return self.m_db.commit()
+
     def close(self):
         print("Database size = ", self.size())
         print("New records =", self.m_new_records)
