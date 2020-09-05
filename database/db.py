@@ -50,9 +50,12 @@ class Database(object):
 
     def close(self):
         print("Database size = ", self.size())
-        print("New records =", self.m_new_records)
-        print("Slow lookups =", self.m_slow_lookups)
-        print("Quick lookups =", self.m_quick_lookups)
+        if self.m_new_records > 0:
+            print("New records =", self.m_new_records)
+        if self.m_slow_lookups > 0:
+            print("Slow lookups =", self.m_slow_lookups)
+        if self.m_quick_lookups > 0:
+            print("Quick lookups =", self.m_quick_lookups)
         self.m_db.close()
 
     def size(self):

@@ -35,3 +35,6 @@ object_detection_training/training/model.ckpt-*
 cat-decision-tree.dot
 cat-decision-tree.gv
 Source.gv
+*.odc
+*.ods#
+*.ods

@@ -45,7 +45,7 @@ def inner_main(db):
             dest = os.path.join("new_cat", "%02d" % (int(catPercentage*100)))
             db.addValue(n, model_version, float(catPercentage * 100))
             safemkdir(dest)
-            dest = os.path.join(dest, os.path.basename(src))
+            dest = os.path.join(dest, n)
             if src != dest:
                 print("%s\t%s\t%s\t%d" %
                       (src, str(resultMap), dest, remaining))
