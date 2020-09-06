@@ -132,6 +132,7 @@ def save_results(results):
 
 class ManualImageProcessor(object):
     def __init__(self):
+        self.m_closed = False
         self.m_results = {}
         self.m_truePositive = 0
         self.m_trueNegative = 0
@@ -148,7 +149,6 @@ class ManualImageProcessor(object):
         REMAINING = total()
         self.nextImage()
         self.m_viewer.show()
-        self.m_closed = False
 
     def close(self):
         if not self.m_closed:
