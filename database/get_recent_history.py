@@ -103,6 +103,8 @@ def main(argv):
     else:
         count = 5000
 
+    output = open(dest, "w")
+
     with db.Database() as data:
         results = get_recent_history(data, count)
 
@@ -110,7 +112,8 @@ def main(argv):
     duration = end - start 
     print("Duration %f (%f/record)", duration, duration / count)
 
-    open(dest, "w").writelines(results)
+    output.writelines(results)
+    output.close()
 
     return 0
 
