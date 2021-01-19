@@ -3,6 +3,7 @@
 from unqlite import UnQLite
 import os
 import sys
+import time
 
 GL_DATABASE_SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 GL_CAMERA_DIR = os.path.dirname(GL_DATABASE_SCRIPT_DIR)
@@ -71,11 +72,12 @@ class Database(object):
         """
         Get a record for an imageName, or create it if absent
         """
+        start = time.time()
 
         if self.m_db.exists(imageName):
-            print("Quick lookup",imageName)
             record = self.m_collection[self.m_db[imageName]]
             self.m_quick_lookups += 1
+            print("Quick lookup", imageName, time.time() - start)
         else:
             # self.debug(imageName)
             if assumeFast:
@@ -85,16 +87,16 @@ class Database(object):
                     lambda record: record['name'] == imageName)
             if len(records) == 0:
                 self.m_new_records += 1
-                print("New record", imageName)
                 record = {'name': imageName}
                 if key is not None:
                     record[key] = value
                     key = None
                 record_id = self.m_collection.store(record)
                 record['__id'] = record_id
+                print("New record", imageName, time.time() - start)
             elif len(records) == 1:
                 self.m_slow_lookups += 1
-                print("Slow lookup", imageName)
+                print("Slow lookup", imageName, time.time() - start)
                 record = records[0]
             else:
                 raise KeyError(
