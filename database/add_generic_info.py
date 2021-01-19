@@ -11,6 +11,19 @@ except ImportError:
     import db
 
 
+def get_time_from_filename(filename):
+    if filename.startswith("timelapse-"):
+        output = time.strptime(filename, "timelapse-%Y-%m-%d-%H-%M-%S.jpeg")
+        return output
+    
+    if filename.startswith("tl-cam1-"):
+        output = time.strptime(filename, "tl-cam1-%Y%m%d-%H%M%S.jpg")
+        return output
+
+    print("Bad filename? ", filename)
+    
+
+
 def add_date_info(m):
     if m is None:
         return False
@@ -20,9 +33,7 @@ def add_date_info(m):
         print("Invalid entry?", repr(m))
         return False
     filename = m['name']
-    output = time.strptime(filename, "timelapse-%Y-%m-%d-%H-%M-%S.jpeg")
-    if output is None:
-        print("Bad filename? ", filename)
+    output = get_time_from_filename(filename)
     m['year'] = output.tm_year
     m['month'] = output.tm_mon
     m['day_of_month'] = output.tm_mday
