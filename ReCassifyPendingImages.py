@@ -11,6 +11,8 @@ tensorflow.get_logger().setLevel('ERROR')
 
 import sys
 import re
+import time
+
 import tensorflow1.camera_dir
 tensorflow1.camera_dir.cd_camera_dir()
 import tensorflow1.utils
@@ -34,10 +36,15 @@ def newCat():
             yield os.path.join(directory,p)
 
 
-def inner_main(db):
+def inner_main(db, argv):
     pending = list(newCat())
     remaining = len(pending)
     print("Total=", remaining)
+    start = time.time()
+    last_commit = time.time()
+    todo = remaining
+    if len(argv) > 1:
+        todo = int(argv[1])
     for src in pending:
         n = os.path.basename(src)
         try:
@@ -51,6 +58,14 @@ def inner_main(db):
                       (src, str(resultMap), dest, remaining))
                 os.rename(src, dest)
             remaining -= 1
+            duration = time.time() - last_commit
+            if duration > 60:
+                print("db commit:", duration)
+                db.commit()
+                last_commit = time.time()
+            todo -= 1
+            if todo <= 0:
+                break
         except EnvironmentError as e:
             print("Failed to process %s" % src)
             print(e)
@@ -59,10 +74,14 @@ def inner_main(db):
             print(e)
             raise
 
+    end = time.time()
+    duration = end - start
+    print("Duration:", duration)
+
 
 def main(argv):
     with database.db.Database() as db:
-        inner_main(db)
+        inner_main(db, argv)
     return 0
 
 if __name__ == '__main__':
