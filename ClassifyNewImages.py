@@ -5,6 +5,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import shutil
 import subprocess
 import sys
+import time
 import tinydb
 import tensorflow1.camera_dir
 tensorflow1.camera_dir.cd_camera_dir()
@@ -72,6 +73,9 @@ def inner_main(db, argv):
 
     remaining = len(new)
 
+    start = time.time()
+    last_commit = time.time()
+
     for n in new:
         src = os.path.join(cameraDir,n)
         try:
@@ -85,9 +89,18 @@ def inner_main(db, argv):
             shutil.copy(src,dest)
             db.addValue(n, model_version, float(catPercentage * 100), assumeFast=True)
             remaining -= 1
+            duration = time.time() - last_commit
+            if duration > 60:
+                print("db commit:", duration)
+                db.commit()
+                last_commit = time.time()
         except Exception as e:
             print("Failed to process %s"%src)
             print(e)
+
+    end = time.time()
+    duration = end - start
+    print("Duration:", duration)
 
     return 0
 
