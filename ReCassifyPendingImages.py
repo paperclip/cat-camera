@@ -50,7 +50,8 @@ def inner_main(db, argv):
         try:
             _, catPercentage, resultMap = c.predict_image(src)
             dest = os.path.join("new_cat", "%02d" % (int(catPercentage*100)))
-            db.addValue(n, model_version, float(catPercentage * 100))
+            db.addValue(n, model_version, float(
+                catPercentage * 100), assumeFast=True)
             safemkdir(dest)
             dest = os.path.join(dest, n)
             if src != dest:
