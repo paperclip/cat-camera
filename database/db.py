@@ -93,7 +93,9 @@ class Database(object):
                     key = None
                 record_id = self.m_collection.store(record)
                 record['__id'] = record_id
-                print("New record", imageName, time.time() - start)
+                duration = time.time() - start
+                if duration > 0.1:
+                    print("New record", imageName, duration)
             elif len(records) == 1:
                 self.m_slow_lookups += 1
                 print("Slow lookup", imageName, time.time() - start)
